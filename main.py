@@ -36,7 +36,7 @@ def ispair(tface):
 def istwopair(pair, tface):
     twopair = -1
     if (pair != -1):
-        for i in range(pair, 0,-1):
+        for i in range(pair-1, 0,-1):
             if (tface[i] == tface[i-1]):
                 twopair = i
                 break
@@ -64,10 +64,14 @@ def value(hand, table):
 
     #PAIR: returns the highest index of the highest pair in the hand
     # i.e. pair([0,1,2,3,3,4,5])
+    # >>>
+    # 
     # returns -1 if no pairs are present
     pair = ispair(tface)
         
-    #TWOPAIR: -1, sum of pairs
+    #TWOPAIR: returns the highest index of the lowest pair in the hand
+    # i.e. pair([0,2,2,3,3,4,5])
+    # returns -1 if no pairs are present
     twopair = istwopair(pair, tface)    
 
     #THREEOFAKIND: -1, value of the card
