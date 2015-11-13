@@ -14,11 +14,16 @@ def face(card):
 def printc(card):
     s = suit(card)
     f = face(card)
+    if (f <= 8): word = f+2
+    elif (f == 9): word = 'Jack'
+    elif (f == 10): word = 'Queen'
+    elif (f == 11): word = 'King'
+    else: word = 'Ace'
 
-    if (s==0):      print('spade')
-    elif (s==1):    print('heart')
-    elif (s==2):    print('diamond')
-    else:           print('club')
+    if (s==0):      print(word, ' of spades')
+    elif (s==1):    print(word, 'of hearts')
+    elif (s==2):    print(word, 'of diamonds')
+    else:           print(word, 'of clubs')
 
 def value(hand, table):
 
@@ -230,3 +235,23 @@ def main():
                         nhands += 1
     print("percent win (max 1.0) ", nwins/nhans)
     print(total)
+                        
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
