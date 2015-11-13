@@ -1,7 +1,7 @@
 import random
 
-#0-12 spades, 0 suite
-#13-25 hearts, 1 suite
+#0-12 spades, 0 suit
+#13-25 hearts, 1 suit
 #26-38 diamonds, 2
 #39-51 clubs, 3
 
@@ -25,6 +25,23 @@ def printc(card):
     elif (s==2):    print(word, 'of diamonds')
     else:           print(word, 'of clubs')
 
+def ispair(tface):
+    pair = -1
+    for i in range(6,0,-1):
+        if (tface[i] == tface[i-1]):
+            pair = i
+            break
+    return pair
+
+def istwopair(pair, tface):
+    twopair = -1
+    if (pair != -1):
+        for i in range(pair, 0,-1):
+            if (tface[i] == tface[i-1]):
+                twopair = i
+                break
+    return twopair
+
 def value(hand, table):
 
     tface = [0]*7
@@ -45,20 +62,13 @@ def value(hand, table):
 
     high = tface[6] #high card
 
-    #PAIR: -1 not pair, 8 pair of eights
-    pair = -1
-    for i in range(6, 1):
-        if (tface[i] == tface[i-1]):
-            pair = i
-            break
+    #PAIR: returns the highest index of the highest pair in the hand
+    # i.e. pair([0,1,2,3,3,4,5])
+    # returns -1 if no pairs are present
+    pair = ispair(tface)
         
     #TWOPAIR: -1, sum of pairs
-    twopair = -1
-    if (pair != -1):
-        for i in range(pair, 1):
-            if (tface[i] == tface[i-1]):
-                twopair = i
-                break
+    twopair = istwopair(pair, tface)    
 
     #THREEOFAKIND: -1, value of the card
     threeofakind = -1
