@@ -5,6 +5,7 @@ import random
 #26-38 diamonds, 2
 #39-51 clubs, 3
 
+
 def suit(card):
     return card//13
 
@@ -27,9 +28,9 @@ def printc(card):
 
 def ispair(tface):
     pair = -1
-    for i in range(6,0,-1):
+    for i in range(len(tface)-1,0,-1):
         if (tface[i] == tface[i-1]):
-            pair = i
+            pair = i-1
             break
     return pair
 
@@ -38,16 +39,60 @@ def istwopair(pair, tface):
     if (pair != -1):
         for i in range(pair-1, 0,-1):
             if (tface[i] == tface[i-1]):
-                twopair = i
+                twopair = i-1
                 break
     return twopair
+
+def isthreeofakind(pair, tface):
+    threeofakind = -1
+    if (pair != -1):
+        for i in range(len(tface)-1, 1, -1):
+            if (tface[i] == tface[i-1] and tface[i-1] == tface[i-2]):
+                threeofakind = i-2
+                break
+    return threeofakind
+
+def isstraight(tface, tsuit):
+    straight = -1
+    straightsuit = -1
+    s = 0
+
+    tface2 = [0]*7
+    tsuit2 = [0]*7
+    tface2[0] = tface[0]
+    for i in range (0, len(tface)-1, 1):
+        if tface[i] != tface[i+1]:
+            tface2[s] = tface[i]
+            tsuit2[s] = tsuit[i]
+            s += 1
+    tface2[s] = tface[len(tface)-1]
+    tsuit2[s] = tsuit[len(tsuit)-1]
+
+    print(tface2)
+    if (s >= 5):
+        for i in range(s, 3, -1):
+            if (tface2[i] -1 == tface2[i-1] and
+                tface2[i-1] -1 == tface2[i-2] and
+                     tface2[i-2] -1 == tface2[i-3] and
+                  tface2[i-3] -1 == tface2[i-4]):
+                if (straight < tface[2]):
+                    straight = tface2[i]
+                    straightsuit = tsuit2[i]
+            if (straight == -1 and tface[6] == 12):
+                  if(tface2[3] == 3 and
+                     tface2[2] == 2 and
+                      tface2[1] == 1 and
+                       tface2[0] == 0):
+                      straight = 3
+                      straightsuit = tsuit2[3]
+    return straight, straightsuit
 
 def value(hand, table):
 
     tface = [0]*7
     tsuit = [0]*7
 
-    for i in range(0, 2):
+    for i in range(0, 7):
         tface[i] = face(hand[i])
         tsuit[i] = suit(hand[i])
 
@@ -62,55 +107,34 @@ def value(hand, table):
 
     high = tface[6] #high card
 
-    #PAIR: returns the highest index of the highest pair in the hand
-    # i.e. pair([0,1,2,3,3,4,5])
+    #PAIR: returns the lowest index of the highest pair in the hand
+    # i.e. ispair([0,1,2,3,3,4,5])
     # >>>
-    # 
+    # 3
     # returns -1 if no pairs are present
     pair = ispair(tface)
         
-    #TWOPAIR: returns the highest index of the lowest pair in the hand
-    # i.e. pair([0,2,2,3,3,4,5])
+    #TWOPAIR: returns the lowest index of the lowest pair in the hand
+    # i.e. istwopair(pair, [0,2,2,3,3,4,5])
+    # >>>
+    # 1
     # returns -1 if no pairs are present
     twopair = istwopair(pair, tface)    
 
-    #THREEOFAKIND: -1, value of the card
-    threeofakind = -1
-    if (pair != -1):
-        for i in range(pair, 2):
-            if (tface[i] == tface[i-1] and tface[i-1] == tface[i-2]):
-                threeofakind = i
-                break
+    #THREEOFAKIND: returns the lowest index of the highest triple in the hand
+    # i.e. isthreeofakind(pair, [0,0,0,3,5,5,5])
+    # >>>
+    # 4
+    # returns -1 if no triple is present
+    threeofakind = isthreeofakind(pair, tface)
 
-    #STRAIGHT: -1, largest card
-    straight = -1
-    straightsuit = -1
-    s = 0
-
-    tface2 = [0]*8
-    tsuit2 = [0]*8
-    tface2[0] = tface[0]
-    for i in range (1, 7):
-        if tface[i] != tface[i-1]:
-            tface2[s] = tface[i]
-            tsuit2[s] = tsuit[i]
-            s += 1
-
-    if (s >= 5):
-        for i in range(s-1, 3):
-            if (tface2[i] -1 == tface2[i-1] and
-                tface2[i] -2 == tface2[i-2] and
-                 tface2[i] -3 == tface2[i-3] and
-                  tface2[i] -4 == tface2[i-4]):
-                  straight = tface2[i]
-                  straightsuit = tsuit2[i]
-            if (straight == -1 and tface[6] == 12):
-                  if(tface2[3] == 3 and
-                     tface2[2] == 2 and
-                      tface2[1] == 1 and
-                       tface2[0] == 0):
-                      straight = 3
-                      straightsuit = tsuit2[3]
+    #STRAIGHT: returns the highest card value of the straight in the hand and
+    # the suit of that card
+    # i.e. isstraight([4,5,6,6,7,8,11])
+    # >>>
+    # (8, 0)
+    # returns (-1,-1) if no straight is present
+    straight, straightsuit = isstraight(tface, tsuit)
 
     #FLUSH: -1, highest card
     flush = -1
