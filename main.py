@@ -1,5 +1,14 @@
 import random
 
+#TODO: test the win() logic heavily
+
+# 0  | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
+# 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 |
+# 26 | 27 | 28 | 29 | 30 | 31 | 32 | 33 | 34 | 35 | 36 | 37 | 38 |
+# 39 | 40 | 41 | 42 | 43 | 44 | 45 | 46 | 47 | 48 | 49 | 50 | 51 |
+
+# 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | J  | Q  | K  | A  |
+
 #0-12 spades, 0 suit
 #13-25 hearts, 1 suit
 #26-38 diamonds, 2
@@ -38,7 +47,7 @@ def istwopair(pair, tface):
     twopair = -1
     if (pair != -1):
         for i in range(pair-1, 0,-1):
-            if (tface[i] == tface[i-1]):
+            if (tface[i] == tface[i-1] and tface[pair] != tface[i]):
                 twopair = i-1
                 break
     return twopair
@@ -68,7 +77,6 @@ def isstraight(tface, tsuit):
     tface2[s] = tface[len(tface)-1]
     tsuit2[s] = tsuit[len(tsuit)-1]
 
-    print(tface2)
     if (s >= 5):
         for i in range(s, 3, -1):
             if (tface2[i] -1 == tface2[i-1] and
@@ -87,25 +95,71 @@ def isstraight(tface, tsuit):
                       straightsuit = tsuit2[3]
     return straight, straightsuit
 
+def isflush(tface, tsuit):                   
+    flush = -1
+    flushsuit = -1
+    
+    suitlist = tsuit
+    suitlist.sort(reverse = False)
+
+    for i in range(len(suitlist)-1, 4, -1):
+        if (suitlist[i] == suitlist[i-1]):
+            if (suitlist[i-1] == suitlist[i-2]):
+                if (suitlist[i-2] == suitlist[i-3]):
+                    if (suitlist[i-3] == suitlist[i-4]):
+                        if (suitlist[i-4] == suitlist[i-5]):
+                            flushsuit = suitlist[i]
+                            for j in range(len(tface)-1, 3,-1):
+                                if (tsuit[j] == flushsuit):
+                                    flush = tface[j]
+                                    break
+                            break
+    return flush, flushsuit
+
+def isfullhouse(twopair, threeofakind, tface):
+    fullhouse = -1
+    if (threeofakind != -1 and twopair != -1):
+        fullhouse = tface[threeofakind]
+    return fullhouse
+
+def isfourofakind(threeofakind, tface):
+    fourofakind = -1
+    if (threeofakind != -1):
+        for i in range(len(tface)-1, 2, -1):
+            if (tface[i] == tface[i-1]):
+                if (tface[i-1] == tface[i-2]):
+                    if (tface[i-2] == tface[i-3]):
+                        fourofakind = i-3
+                        break
+    return fourofakind
+
+def isstraightflush(straight, straightsuit, flush, flushsuit):
+    straightflush = -1
+    if (straight != -1 and flush != -1 and flushsuit == straightsuit):
+        straightflush = straight
+    return straightflush
+
 def value(hand, table):
 
-    tface = [0]*7
-    tsuit = [0]*7
+    tface = [0]*(len(hand)+len(table))
+    tsuit = [0]*(len(hand)+len(table))
 
-    for i in range(0, 7):
+    for i in range(0, len(hand)):
         tface[i] = face(hand[i])
         tsuit[i] = suit(hand[i])
 
-    for j in range(2, 7):
-        tface[i] = face(table[i-2])
-        tsuit[i] = suit(table[i-2])
+    for j in range(len(hand), len(hand)+len(table),1):
+        tface[j] = face(table[j-2])
+        tsuit[j] = suit(table[j-2])
 
     #TODO what kind of sorting are we talking about?
     #sorted in ascending order
     tface.sort(reverse = False)
     tsuit.sort(reverse = False)
+    #print("tface after sorting", tface)
 
-    high = tface[6] #high card
+    highcard = tface[len(tface)-1] #high card
+    #print("Highcard(value) - ", highcard)
 
     #PAIR: returns the lowest index of the highest pair in the hand
     # i.e. ispair([0,1,2,3,3,4,5])
@@ -113,119 +167,149 @@ def value(hand, table):
     # 3
     # returns -1 if no pairs are present
     pair = ispair(tface)
+    #print("Pair(index)- ", pair)
         
-    #TWOPAIR: returns the lowest index of the lowest pair in the hand
+    #TWO PAIRS: returns the lowest index of the lowest pair in the hand
     # i.e. istwopair(pair, [0,2,2,3,3,4,5])
     # >>>
     # 1
     # returns -1 if no pairs are present
-    twopair = istwopair(pair, tface)    
+    twopair = istwopair(pair, tface)
+    #print("Two pairs(lowest index) - ", twopair)
 
-    #THREEOFAKIND: returns the lowest index of the highest triple in the hand
+    #THREE OF A KIND: returns the lowest index of the highest triple in the hand
     # i.e. isthreeofakind(pair, [0,0,0,3,5,5,5])
     # >>>
     # 4
     # returns -1 if no triple is present
     threeofakind = isthreeofakind(pair, tface)
+    #print("Three of a kind(lowest index) - ", threeofakind)
 
     #STRAIGHT: returns the highest card value of the straight in the hand and
     # the suit of that card
-    # i.e. isstraight([4,5,6,6,7,8,11])
+    # i.e. isstraight([4,5,6,6,7,8,11], [0,0,0,0,0,0,0])
     # >>>
     # (8, 0)
     # returns (-1,-1) if no straight is present
     straight, straightsuit = isstraight(tface, tsuit)
+    #print("Straight(highest value) - ", straight)
+    #print("Straightsuit - ", straightsuit)
 
-    #FLUSH: -1, highest card
-    flush = -1
-    flushsuit = -1
-    cs = [0]*4
-    ms = [0]*4
+    #FLUSH: returns the highest card value of the flush in the hand and
+    # the suit of that card
+    # i.e. isflush([4,5,6,6,7,8,11], [0,0,0,0,0,0,0])
+    # >>>
+    # (11, 0)
+    # returns (-1,-1) if no flush is present                
+    flush, flushsuit = isflush(tface, tsuit)
+    #print("Flush(highest value) - ", flush)
+    #print("Flushsuit - ", flushsuit)
     
-    for i in range(0, 6):
-        cs[tsuit[i]] += 1
-        ms[tsuit[i]] = max(ms[tsuit[i]], tface[i])
+    #FULL HOUSE: returns the highest card value of the triple in the hand
+    # i.e. isfullhouse(0, 3, [1,1,8,11,11,11,51])
+    # >>>
+    # 11
+    # returns -1 if no full house is present
+    fullhouse = isfullhouse(twopair, threeofakind, tface)
+    #print("Fullhouse(value of triple) - ", fullhouse)
 
-    if (cs[0] >= 5):
-        flush = ms[0]
-        flushsuit = 0
-    if (cs[1] >= 5):
-        flush = ms[1]
-        flushsuit = 1
-    if (cs[2] >= 5):
-        flush = ms[2]
-        flushsuit = 2
-    if (cs[3] >= 5):
-        flush = ms[3]
-        flushsuit = 3
+    #FOUR OF A KIND: returns the lowest index of of the quadruple in the hand
+    # i.e. isfourofakind(3, [1,1,11,11,11,11,51])
+    # >>>
+    # 5
+    # returns -1 if no four of a kind is present
+    fourofakind = isfourofakind(threeofakind, tface)
+    #print("Four of a kind(lowest index) - ", fourofakind)
 
-    #FULLHOUSE: -1, highest triple
-    fullhouse = -1
-    if (threeofakind != -1 and twopair != -1):
-        fullhouse = tface[threeofakind]
-
-    #FOUROFAKIND: -1, card value
-    fourofakind = -1
-    if (threeofakind != -1):
-        for i in range(threeofakind, 3):
-            if (tface[i] == tface[i-1] and
-                tface[i] == tface[i-2] and
-                tface[i] == tface[i-3]):
-                fourofakind = i
-
-    #STRAIGHTFLUSH: -1, highest card
-    straightflush = -1
-    if (straight != -1 and flush != -1 and flushsuit == straightsuit):
-        straightflush = straight
-
-    #TODO: stemmer denne logikken?
+    #STRAIGHT FLUSH: returns the highest card value of the straight in the hand
+    # i.e. isstraightflush(12,0,12,0)
+    # >>>
+    # 12
+    # returns -1 if no straight flush is present
+    straightflush = isstraightflush(straight, straightsuit, flush, flushsuit)
+    #print("Straight flush(highest card) - ", straightflush)
+    
     #HIGHCARDS
-    pair = tface[pair]
-    twopair = tface[twopair]
-    threeofakind = tface[threeofakind]
-    fourofakind = tface[fourofakind]
-
     if (straightflush != -1):
         return 13*8 + straightflush
 
     if (fourofakind != -1):
-        return 13*7 + straightflush
+        fourofakind = tface[fourofakind]
+        return 13*7 + fourofakind
 
     if (fullhouse != -1):
-        return 13*6 + straightflush
+        return 13*6 + fullhouse
 
     if (flush != -1):
-        return 13*5 + straightflush
+        return 13*5 + flush
 
     if (straight != -1):
-        return 13*4 + straightflush
-
+        return 13*4 + straight
+    
     if (threeofakind != -1):
-        return 13*3 + straightflush
+        threeofakind = tface[threeofakind]
+        return 13*3 + threeofakind
 
     if (twopair != -1):
-        return 13*2 + straightflush
+        twopair = tface[pair]
+        return 13*2 + twopair
 
     if (pair != -1):
-        return 13*1 + straightflush
+        pair = tface[pair]
+        return 13*1 + pair
 
     return tface[6]
 
 def win(hand0, hand1, table):
     value0 = value(hand0, table)
+    #print(value0)
     value1 = value(hand1, table)
+    #print(value1)
 
     if (value0 == value1):
         if (face(hand0[0]) == face(hand0[1]) and face(hand1[0]) == face(hand1[1])):
             return (face(hand0[0]) > face(hand1[0]))
         elif (face(hand0[0]) == face(hand0[1])):
-            return true;
+            return True;
         elif (face(hand1[0]) == face(hand1[1])):
-            return false
+            return False
         else:
             return max(face(hand0[0]), face(hand0[1])) > max(face(hand0[0]), face(hand0[1]))
     else:
         return value0 > value1
+
+def testWinningOdds():
+    hand0 = [0]*2
+    hand1 = [0]*2
+    table = [0]*5
+    
+    hand0[0] = int(random.random()*52 //1)
+    hand0[1] = int(random.random()*52 //1)
+
+    print('We have: ')
+    printc(hand0[0])
+    printc(hand0[1])
+
+    hand1[0] = int(random.random()*52//1)
+    hand1[1] = int(random.random()*52//1)
+    print('He has: ')
+    printc(hand1[0])
+    printc(hand1[1])
+
+    
+    table[0] = int(random.random()*52//1)
+    table[1] = int(random.random()*52//1)
+    table[2] = int(random.random()*52//1)
+    table[3] = int(random.random()*52//1)
+    table[4] = int(random.random()*52//1)
+    print('Table: ')
+    printc(table[0])
+    printc(table[1])
+    printc(table[2])
+    printc(table[3])
+    printc(table[4])
+    
+    print(win(hand0, hand1, table))
 
 def main():
     total = 0
@@ -237,7 +321,9 @@ def main():
     hand0[0] = int(random.random()*52 //1)
     hand0[1] = int(random.random()*52 //1)
 
-    print('We have: ', hand0[0], hand0[1])
+    print('We have: ')
+    printc(hand0[0])
+    printc(hand0[1])
 
     nhands = 0
     nwins = 0
@@ -245,16 +331,11 @@ def main():
 
     #The big LOOP
 
-    i = 5
-    j = 43
-
-    print(i, j)
-
-    hand1[0] = i
-    hand1[1] = j
-    print('He has:', i, j)
-    print(hand1[0])
-    print(hand1[1])
+    hand1[0] = int(random.random()*52//1)
+    hand1[1] = int(random.random()*52//1)
+    print('He has: ')
+    printc(hand1[0])
+    printc(hand1[1])
 
     for k in range(j+1, 50):
         for l in range(k+1, 50):
@@ -271,8 +352,7 @@ def main():
                             nwins += 1
 
                         nhands += 1
-    print("percent win (max 1.0) ", nwins/nhans)
-    print(total)
+    print("percent win (max 1.0) ", nwins/nhands)
                         
     
 
