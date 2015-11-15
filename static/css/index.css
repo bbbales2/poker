@@ -1,0 +1,16 @@
+.toolbar {
+    width : 100%;
+    text-align : right;
+    border-width : 1px;
+    border-bottom-style : solid;
+}
+
+.card {
+    max-width : 100px;
+}
+
+.msg {
+    width : 100%;
+    border-width : 1px;
+    border-bottom-style : solid;
+}

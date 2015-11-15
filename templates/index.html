@@ -1,0 +1,45 @@
+<html>
+  <head>
+    <script src="static/js/jquery.js"></script>
+    <script src="static/js/underscore.js"></script>
+    <script src="static/js/backbone.js"></script>
+
+    <script src="static/js/index.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="static/css/index.css">
+    
+    <script class="cardTemplate" type="application/text">
+      <td>
+        <img class="card" src="<%= url %>">
+      </td>
+    </script>
+  </head>
+  <body>
+    <div class="data" style="display: none;">
+      {{ data }}
+    </div>
+    <div class="toolbar"><a href="/?reset=1">Reset game</a></div>
+    <div class="msg">Ready</div>
+
+    <center>
+      <div>
+        <h3>
+          Bets
+        </h3>
+      </div>
+      <div class="bets">
+      </div>
+      <h3>Hand Cards</h3>
+      <table>
+        <tr class="handCards">
+        </tr>
+      </table>
+      <h3>Hole Cards</h3>
+      <table>
+        <tr class="holeCards">
+        </tr>
+      </table>
+      <button class="raise">Raise</button><button class="check">Check</button><button class="fold">Fold</button>
+    </center>
+  </body>
+</html>
