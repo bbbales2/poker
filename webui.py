@@ -120,10 +120,16 @@ def make_play(player, action):
         elif flask.session['round'] == 2:
             flask.session['cards'].append(flask.session['deck'].pop())
         elif flask.session['round'] >= 3:
-            print 'heyyeyeye'
-            flask.session['winner'] = 0 if main.win([ai2num(card) for card in flask.session['hcards']],
-                                                    [ai2num(card) for card in flask.session['ccards']],
-                                                    [ai2num(card) for card in flask.session['cards']]) else 1
+            retVal = main.win([ai2num(card) for card in flask.session['hcards']],
+                              [ai2num(card) for card in flask.session['ccards']],
+                              [ai2num(card) for card in flask.session['cards']])
+
+            if retVal == 0:
+                retVal = 1
+            elif retVal == 1:
+                retVal = 0
+
+            flask.session['winner'] = retVal
 
         flask.session['percent'] = main.estimate([ai2num(c) for c in flask.session['hcards']], [ai2num(c) for c in flask.session['deck'] + flask.session['ccards']], [ai2num(c) for c in flask.session['cards']])
 
