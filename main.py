@@ -1,4 +1,5 @@
 import random
+import numpy
 
 #TODO: test the win() logic heavily
 
@@ -95,25 +96,28 @@ def isstraight(tface, tsuit):
                       straightsuit = tsuit2[3]
     return straight, straightsuit
 
+import collections
+
 def isflush(tface, tsuit):                   
     flush = -1
     flushsuit = -1
     
-    suitlist = tsuit
-    suitlist.sort(reverse = False)
+    counter = collections.Counter(tsuit)
 
-    for i in range(len(suitlist)-1, 4, -1):
-        if (suitlist[i] == suitlist[i-1]):
-            if (suitlist[i-1] == suitlist[i-2]):
-                if (suitlist[i-2] == suitlist[i-3]):
-                    if (suitlist[i-3] == suitlist[i-4]):
-                        if (suitlist[i-4] == suitlist[i-5]):
-                            flushsuit = suitlist[i]
-                            for j in range(len(tface)-1, 3,-1):
-                                if (tsuit[j] == flushsuit):
-                                    flush = tface[j]
-                                    break
-                            break
+    for s in counter:
+        if counter[s] >= 5:
+            flushsuit = s
+
+            toReturn = []
+            for j in range(len(tface) - 1, -1, -1):
+                if (tsuit[j] == flushsuit):
+                    toReturn.append(tface[j])
+                
+                if len(toReturn) == 5:
+                    return toReturn, flushsuit
+                    
+            raise Exception('Invalid Flush')
+
     return flush, flushsuit
 
 def isfullhouse(twopair, threeofakind, tface):
@@ -154,8 +158,7 @@ def value(hand, table):
 
     #TODO what kind of sorting are we talking about?
     #sorted in ascending order
-    tface.sort(reverse = False)
-    tsuit.sort(reverse = False)
+    tface, tsuit = zip(*sorted(zip(tface, tsuit), key = lambda x : x[0]))
     #print("tface after sorting", tface)
 
     highcard = tface[len(tface)-1] #high card
@@ -231,52 +234,135 @@ def value(hand, table):
     
     #HIGHCARDS
     if (straightflush != -1):
-        return 13*8 + straightflush
+        #print "straight flush"
+        return 8, [straightflush], []
 
     if (fourofakind != -1):
+        #print "four of a kind"
         fourofakind = tface[fourofakind]
-        return 13*7 + fourofakind
+
+        cards = set(tface)
+        cards.remove(fourofakind)
+        cards = sorted(list(cards))
+
+        return 7, [fourofakind], cards[-1:]
 
     if (fullhouse != -1):
-        return 13*6 + fullhouse
+        #print "full house"
+        return 6, [max(tface[pair], tface[twopair]), fullhouse], []
 
     if (flush != -1):
-        return 13*5 + flush
+        #print "flush"
+        return 5, flush, []
 
     if (straight != -1):
-        return 13*4 + straight
+        #print "straight"
+        return 4, [straight], []
     
     if (threeofakind != -1):
+        #print "three of a kind"
         threeofakind = tface[threeofakind]
-        return 13*3 + threeofakind
+
+        cards = set(tface)
+        cards.remove(threeofakind)
+        cards = sorted(list(cards))
+
+        return 3, [threeofakind], cards[-2:]
 
     if (twopair != -1):
-        twopair = tface[pair]
-        return 13*2 + twopair
+        #print "two pair"
+        twopair = tface[twopair]
+
+        cards = set(tface)
+        cards.remove(twopair)
+        cards.remove(tface[pair])
+        cards = sorted(list(cards))
+
+        return 2, [twopair, tface[pair]], cards[-1:]
 
     if (pair != -1):
+        #print "pair"
         pair = tface[pair]
-        return 13*1 + pair
 
-    return tface[6]
+        cards = set(tface)
+        cards.remove(pair)
+        cards = sorted(list(cards))
+
+        return 1, [pair], cards[-3:]
+
+    #print "high card"
+
+    return 0, [], tuple(tface[2:7])
 
 def win(hand0, hand1, table):
-    value0 = value(hand0, table)
-    #print(value0)
-    value1 = value(hand1, table)
-    #print(value1)
+    #print "player 0"
+    type0, value0, highcards0 = value(hand0, table)
 
-    if (value0 == value1):
-        if (face(hand0[0]) == face(hand0[1]) and face(hand1[0]) == face(hand1[1])):
-            return (face(hand0[0]) > face(hand1[0]))
-        elif (face(hand0[0]) == face(hand0[1])):
-            return True;
-        elif (face(hand1[0]) == face(hand1[1])):
-            return False
-        else:
-            return max(face(hand0[0]), face(hand0[1])) > max(face(hand0[0]), face(hand0[1]))
-    else:
-        return value0 > value1
+    value0 = numpy.array(sorted(value0, reverse = True))
+    highcards0 = numpy.array(sorted(highcards0, reverse = True))
+    #print type0, value0, highcards0
+    #print "player 1"
+    type1, value1, highcards1 = value(hand1, table)
+
+    value1 = numpy.array(sorted(value1, reverse = True))
+    highcards1 = numpy.array(sorted(highcards1, reverse = True))
+    #print type1, value1, highcards1
+    #print "----"
+
+    if type0 != type1:
+        return type0 > type1
+
+    comp = (value0 == value1)
+
+    #print comp
+
+    for i, eq in enumerate(comp):
+        if not eq:
+            #print i
+            return value0[i] > value1[i]
+
+    comp = (highcards0 == highcards1)
+
+    #print "checking high card"
+
+    for i, eq in enumerate(comp):
+        if not eq:
+            #print i
+            return highcards0[i] > highcards1[i]        
+
+    #print "it's a tie"
+
+    return 2
+
+def estimate(hand0, deck, hole):
+    deck0 = list(deck)
+
+    outcomes = []
+
+    for i in range(10000):
+        random.shuffle(deck0)
+        thole = list(hole)
+
+        hand1 = deck0[0 : 2]
+
+        thole += deck0[2 : 2 + 5 - len(hole)]
+
+        #printc(hand0[0])
+        #printc(hand0[1])
+        #printc(hand1[0])
+        #printc(hand1[1])
+        #printc(thole[0])
+        #printc(thole[1])
+        #printc(thole[2])
+        #printc(thole[3])
+        #printc(thole[4])
+        outcomes.append(win(hand0, hand1, thole))
+
+    outcomes = numpy.array(outcomes)
+
+    outcomes[outcomes == 2] = 0.5
+
+    return numpy.mean(outcomes)
 
 def testWinningOdds():
     hand0 = [0]*2

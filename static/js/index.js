@@ -15,8 +15,23 @@ Index.Controller = Backbone.View.extend(
 
             $( '.handCards' ).empty();
             $( '.holeCards' ).empty();
+            $( '.computerCards' ).empty();
 
             $( '.bets' ).text( this.data.bets );
+            $( '.percent' ).text( this.data.percent );
+
+            if(this.data.winner == 0)
+            {
+                $( '.winner' ).text( 'Person won!' );
+            }
+            else if(this.data.winner == 1)
+            {
+                $( '.winner' ).text( 'Computer won!' );
+            }
+            else if(this.data.winner == 2)
+            {
+                $( '.winner' ).text( 'Players tied!!!!!' );
+            }
 
             var rankToString = { 2 : '2',
                                  3 : '3',
@@ -43,9 +58,30 @@ Index.Controller = Backbone.View.extend(
 
                 var url = 'static/images/';
 
-                url += rankToString[card[0]] + '_of_' + suitToString[card[1]] + '.png';
+                url += rankToString[card[0]] + '_of_' + suitToString[card[1]];
+
+                if(card[0] == 'J' || card[0] == 'Q' || card[0] == 'K')
+                    url += '2';
+
+                url += '.png';
 
                 $( template({ url : url }) ).appendTo( $( '.handCards' ) );
+            }
+
+            for(var i = 0; i < this.data.ccards.length; i++)
+            {
+                var card = this.data.ccards[i];
+
+                var url = 'static/images/';
+
+                url += rankToString[card[0]] + '_of_' + suitToString[card[1]];
+
+                if(card[0] == 'J' || card[0] == 'Q' || card[0] == 'K')
+                    url += '2';
+
+                url += '.png';
+
+                $( template({ url : url }) ).appendTo( $( '.computerCards' ) );
             }
 
             for(var i = 0; i < this.data.cards.length; i++)
@@ -54,7 +90,12 @@ Index.Controller = Backbone.View.extend(
 
                 var url = 'static/images/';
 
-                url += rankToString[card[0]] + '_of_' + suitToString[card[1]] + '.png';
+                url += rankToString[card[0]] + '_of_' + suitToString[card[1]];
+
+                if(card[0] == 'J' || card[0] == 'Q' || card[0] == 'K')
+                    url += '2';
+
+                url += '.png';
 
                 $( template({ url : url }) ).appendTo( $( '.holeCards' ) );
             }

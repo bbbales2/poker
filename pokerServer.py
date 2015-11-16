@@ -123,10 +123,6 @@ def handleBets(cplayer):
 
     raise Exception("Should never get here")
 
-# Deal players their two cards
-# In two players, button == small blind
-# Non button player goes first!
-
 for r in range(4):
     prepareRound(r)
     result = handleBets(0 if r > 0 else 1)
