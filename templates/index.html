@@ -18,14 +18,44 @@
     <div class="data" style="display: none;">
       {{ data }}
     </div>
-    <div class="toolbar"><a href="/?reset=1">Reset game</a></div>
-    <div class="msg">Ready</div>
+    <div class="toolbar"></div>
 
     <center>
       <div>
-        <h3>Winner</h3>
+        <table border="1">
+          <tr>
+            <th>
+            </th>
+            <th>
+              Player Money
+            </th>
+            <th>
+              Computer Money
+            </th>
+          </tr>
+          <tr>
+            <td>
+              Wallet
+            </td>
+            <td class="playerWallet">
+            </td>
+            <td class="computerWallet">
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Pool
+            </td>
+            <td class="playerPool">
+            </td>
+            <td class="computerPool">
+            </td>
+          </tr>
+        </table>
       </div>
-      <div class="winner">
+      <div class="winContainer">
+        <h3>Winner</h3>
+        <div class="winner"></div>
       </div>
       <div>
         <h3>% to Win</h3>
@@ -43,6 +73,7 @@
         </tr>
       </table>
       <h3>Computer Cards</h3>
+      <input type="checkbox" class="hide" checked>Hide Computer Cards
       <table>
         <tr class="computerCards">
         </tr>
@@ -52,7 +83,9 @@
         <tr class="holeCards">
         </tr>
       </table>
-      <button class="raise">Raise</button><button class="check">Check</button><button class="fold">Fold</button>
+      <button class="raise">Raise</button><button class="check">Check</button><button class="fold">Fold</button><br>
+      <a href="/?reset=1&which=0">New game as big blind</a> <a href="/?reset=1&which=1">New game as small blind</a><br>
+      <a href="/?resetWallet=1">Reset Wallet</a>
     </center>
   </body>
 </html>

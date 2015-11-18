@@ -362,7 +362,7 @@ def estimate(hand0, deck, hole):
 
     outcomes[outcomes == 2] = 0.5
 
-    return numpy.mean(outcomes)
+    return numpy.mean(outcomes) if len(outcomes) > 0 else 0
 
 def testWinningOdds():
     hand0 = [0]*2
