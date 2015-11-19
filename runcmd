@@ -1,0 +1,1 @@
+./play_match.pl test1 holdem.limit.2p.reverse_blinds.game 100 0 fred ../player.py albert ./example_player.limit.2p.sh
