@@ -339,7 +339,7 @@ def estimate(hand0, deck, hole):
 
     outcomes = []
 
-    for i in range(10000):
+    for i in range(100):
         random.shuffle(deck0)
         thole = list(hole)
 
@@ -396,66 +396,3 @@ def testWinningOdds():
     printc(table[4])
     
     print(win(hand0, hand1, table))
-
-def main():
-    total = 0
-
-    hand0 = [0]*2
-    hand1 = [0]*2
-    table = [0]*5
-
-    hand0[0] = int(random.random()*52 //1)
-    hand0[1] = int(random.random()*52 //1)
-
-    print('We have: ')
-    printc(hand0[0])
-    printc(hand0[1])
-
-    nhands = 0
-    nwins = 0
-
-
-    #The big LOOP
-
-    hand1[0] = int(random.random()*52//1)
-    hand1[1] = int(random.random()*52//1)
-    print('He has: ')
-    printc(hand1[0])
-    printc(hand1[1])
-
-    for k in range(j+1, 50):
-        for l in range(k+1, 50):
-            for m in range(l+1, 50):
-                for n in range(m+1, 50):
-                    for o in range(n+1, 50):
-                        table[0] = k
-                        table[1] = l
-                        table[2] = m
-                        table[3] = n
-                        table[4] = o
-
-                        if (win(hand0, hand1, table)):
-                            nwins += 1
-
-                        nhands += 1
-    print("percent win (max 1.0) ", nwins/nhands)
-                        
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
