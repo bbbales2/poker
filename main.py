@@ -334,18 +334,19 @@ def win(hand0, hand1, table):
 
     return 2
 
-def estimate(hand0, deck, hole):
+def estimate(hand0, deck, hole, N = 100):
     deck0 = list(deck)
 
     outcomes = []
 
-    for i in range(100):
-        random.shuffle(deck0)
+    for i in range(N):
+        cards = random.sample(deck0, 7)
+        #random.shuffle(deck0)
         thole = list(hole)
 
-        hand1 = deck0[0 : 2]
+        hand1 = cards[0:2]#random.sample(deck0, 2)
 
-        thole += deck0[2 : 2 + 5 - len(hole)]
+        thole += cards[2 : 2 + 5 - len(hole)]#deck0[2 : 2 + 5 - len(hole)]
 
         #printc(hand0[0])
         #printc(hand0[1])

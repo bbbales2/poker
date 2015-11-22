@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# Evaluate chance of winning at each betting round. Raise when possible
+
 import socket
 import random
 import sys
@@ -80,7 +82,7 @@ while 1:
         #print 'otherDudesCards', otherDudesCards
 
         finished = False
-        if len(ourCards) == len(otherDudesCards):
+        if (len(ourCards) == len(otherDudesCards)) or (len(bets[-1]) > 0 and bets[-1][-1] == 'f'):
             finished = True
         
         play = False
@@ -125,7 +127,8 @@ while 1:
 
             percent = main.estimate([ai2num(c) for c in ourCards],
                                     [ai2num(c) for c in deck],
-                                    [ai2num(c) for c in holeCards])
+                                    [ai2num(c) for c in holeCards],
+                                    100)
 
             #print "EQUITY: ", percent
 
