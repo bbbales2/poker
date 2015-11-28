@@ -334,8 +334,8 @@ def win(hand0, hand1, table):
 
     return 2
 
-def estimate(hand0, deck, hole, N = 100):
-    deck0 = list(deck)
+def estimate(hand0, hole, N = 100):
+    deck0 = list(set(range(0, 52)) - set(hand0) - set(hole))
 
     outcomes = []
 
@@ -364,6 +364,67 @@ def estimate(hand0, deck, hole, N = 100):
     outcomes[outcomes == 2] = 0.5
 
     return numpy.mean(outcomes) if len(outcomes) > 0 else 0
+
+def estimate2(hand0, hole, N = 30):
+    outcomes = []
+
+    for i in range(N):
+        thole = list(hole)
+
+        deck = set(range(0, 52)) - set(hand0) - set(hole)
+
+        cards = random.sample(deck, 7)
+
+        hand1 = cards[0:2]#random.sample(deck0, 2)
+
+        w1s = []
+        w2s = []
+
+        if len(hole) == 0:
+            state = 0
+        elif len(hole) == 3:
+            state = 1
+        elif len(hole) == 4:
+            state = 2
+        elif len(hole) == 5:
+            state = 3
+        
+        for i in range(state, 3):
+            thole = hole + cards[2 : 2 + (i + 2) - len(hole)]#deck0[2 : 2 + 5 - len(hole)]
+
+            w1s.append(estimate(hand0, thole, 30))
+            w2s.append(estimate(hand1, thole, 30))
+
+        p1folded = False
+        p2folded = False
+        for w1, w2 in zip(w1s, w2s):
+            if w1 < 0.5:
+                p1folded = True
+            
+            if w2 < 0.5:
+                p2folded = True
+
+            if p1folded and not p2folded:
+                outcomes.append(0.0)
+            elif not p1folded and p2folded:
+                outcomes.append(1.0)
+            elif p1folded and p2folded:
+                outcomes.append(0.5)
+
+        if not p1folded and not p2folded:
+            #print hand0, hand1, hole
+            thole = hole + cards[2 : 2 + 5 - len(hole)]#deck0[2 : 2 + 5 - len(hole)]
+
+            output = win(hand0, hand1, thole)
+
+            if output == 2:
+                outcomes.append(0.5)
+            elif output == 1:
+                outcomes.append(1.0)
+            elif output == 0:
+                outcomes.append(0.0)
+
+    return numpy.mean(outcomes)
 
 def testWinningOdds():
     hand0 = [0]*2

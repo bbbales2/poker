@@ -47,12 +47,21 @@ sock.send('VERSION:2.0.0\n')
 
 print 'WE ARE THIS'
 
-def val(e, preflop, bets, maxRaises, pool, sb = 2, bb = 4):
+distributions = {
+    0 : {
+    },
+    1 : {
+    }
+}
+def val(e, bets, maxRaises, pool, randomplayer, sb, bb):
+
     raises = 0
 
-    for b in bets:
+    for b in bets[-1]:
         if b == 'r':
             raises += 1
+
+    preflop = len(bets) == 1
 
     sgn = 1
     if not preflop:
@@ -61,32 +70,97 @@ def val(e, preflop, bets, maxRaises, pool, sb = 2, bb = 4):
     vals = {}
 
     if raises < maxRaises:
-        #print 'raise side of tree'
-        vals['r'] = val(e, preflop, bets + 'r', maxRaises, pool, sb, bb)[1]
-        
-    if len(bets) == 0:
-        #print 'check side of tree'
-        vals['c'] = val(e, preflop, bets + 'c', maxRaises, pool, sb, bb)[1]
+
+        bets2 = list(bets)
+        bets2[-1] += 'r'
+        vals['r'] = val(e, bets2, maxRaises, pool, randomplayer, sb, bb)[1]
+
+    if len(bets[-1]) == 0:
+
+        bets2 = list(bets)
+        bets2[-1] += 'c'
+        vals['c'] = val(e, bets2, maxRaises, pool, randomplayer, sb, bb)[1]
     else:
-        #print 'hihihihi', e, raises, bb, -(e - 0.5) * (2 * bb + raises * 2 * bb) 
+
         vals['c'] = -(e - 0.5) * ((2 * bb + raises * 2 * bb) + pool)
 
-    if preflop and len(bets) == 0:
+    if preflop and len(bets[0]) == 0:
         vals['f'] = sb
     else:
-        #print raises, (-1)**raises
-        vals['f'] = (raises * bb + pool / 2.0) * (-1)**(raises + (1 if (len(bets) > 0 and bets[0] == 'c') else 0) + (1 if not preflop else 0))
-        
-    if len(bets) == 1 and bets[0] == 'c':
+
+        vals['f'] = (raises * bb + pool / 2.0) * (-1)**(raises + (1 if (len(bets[-1]) > 0 and bets[-1][0] == 'c') else 0) + (1 if not preflop else 0))
+
+    if (len(bets[-1]) == 1 and bets[-1][0] == 'c') or (len(bets) > 1 and len(bets[-1]) == 0):
         del vals['f']
 
-    if len(bets) % 2 == (1 if preflop else 0):
-        #print 'max of ', vals
-        test = sorted(vals.items(), key = lambda x : x[1])[-1]
-        return test
+
+
+
+    if len(bets[-1]) % 2 == (1 if preflop else 0):
+
+        key = (len(bets), bets[-1])
+
+        if key not in distributions[randomplayer]:
+            dist = { 'r' : 1.0, 'c' : 1.0, 'f' : 1.0 }
+        else:
+            dist = distributions[randomplayer][key]
+    
+        if randomplayer == 0 and sum(dist.values()) > 10:
+
+            test = 0.0
+            den = 0.0
+            for c, v in vals.items():
+                den += dist[c]
+
+            for c, v in vals.items():
+                test += (dist[c] / den) * v
+
+
+            test = ('wtf', test)
+
+        else:
+
+            test = sorted(vals.items(), key = lambda x : x[1])[-1]
     else:
-        #print 'min of ', vals
-        return sorted(vals.items(), key = lambda x : x[1])[0]
+
+        key = (len(bets), bets[-1])
+
+        if key not in distributions[randomplayer]:
+            dist = { 'r' : 1.0, 'c' : 1.0, 'f' : 1.0 }
+        else:
+            dist = distributions[randomplayer][key]
+
+    
+        if randomplayer == 1 and sum(dist.values()) > 10:
+            test = 0.0
+            den = 0.0
+            for c, v in vals.items():
+                den += dist[c]
+
+            for c, v in vals.items():
+                test += (dist[c] / den) * v
+
+            test = ('wtf', test)
+
+        else:
+
+            test = sorted(vals.items(), key = lambda x : x[1])[0]
+
+
+    return test
+
+otherBets = ''
+
+def getBets(bets, position):
+    output = ''
+
+    for r in range(len(bets)):
+        if r == 0:
+            output += bets[r][(1 - position)::2]
+        else:
+            output += bets[r][position::2]
+                    
+    return output
 
 while 1:
     data = sock.recv(bufferSize).strip()
@@ -154,6 +228,53 @@ while 1:
 
         #print "play", play
 
+        print '----------------'
+        print "received ", line
+
+        #print bets
+
+        def lastBet(bets):
+            tmpBets = list(bets)
+
+            if len(tmpBets) == 1 and len(tmpBets[-1]) == 0:
+                return -1
+
+            if len(tmpBets[-1]) == 0 and len(tmpBets) > 1:
+                del tmpBets[-1]
+
+            #print tmpBets
+            if len(tmpBets) == 1:
+                if len(tmpBets[0]) % 2 == 1:
+                    return 1
+                else:
+                    return 0
+            else:
+                if len(tmpBets[-1]) % 2 == 1:
+                    return 0
+                else:
+                    return 1
+
+        #print position, otherBets
+
+        print bets, len(bets), len(bets[-1])
+        print lastBet(bets), position
+        #print 'lastplay ', lastBet(bets), position
+
+        if lastBet(bets) == 1 - position:
+            if len(bets) > 0 and len(bets[-1]) > 0:
+                key = (len(bets), bets[-1][:-1])
+            else:
+                key = (len(bets) - 1, bets[-2][:-1])
+
+            otherBets = getBets(bets, 1 - position)
+
+            if key not in distributions[1 - position]:
+                distributions[1 - position][key] = { 'r' : 1.0, 'c' : 1.0, 'f' : 1.0 }
+
+            distributions[1 - position][key][otherBets[-1]] += 1
+
+            print 'update', distributions
+
         if play and not finished:
             ranks = '23456789TJQKA'
             suits = 'shdc'
@@ -171,14 +292,32 @@ while 1:
 
             percent = main.estimate([ai2num(c) for c in ourCards],
                                     [ai2num(c) for c in holeCards],
-                                    100)
+                                     100)
 
-            #print "EQUITY: ", percent
+            print "EQUITY: ", percent
 
             if position == 0:
                 percent = 1 - percent
 
-            response = val(percent, roundNumber == 1, bets[-1], 3 if roundNumber == 1 else 4, 0, 10, 20)[0]
+            pool = 0
+
+            for rd, betRound in enumerate(bets[:-1]):
+                if len(betRound) == 0:
+                    continue
+
+                if rd == 0 and betRound[0] == 'c':
+                    pool += 4
+
+                for bet in betRound:
+                    if bet == 'r':
+                        pool += 8
+
+            print 'Pool: ', pool
+
+            response = val(percent, bets, 3 if roundNumber == 1 else 4, pool, 1 - position, 10, 20)[0]
+
+            #if percent0 < 0.4:
+            #    response = 'f'
 
             #response = 'r'
 
@@ -198,7 +337,7 @@ while 1:
             #        response = 'f'
 
             string = '{0}:{1}\r\n'.format(line, response)
-            #print "send : ", "c"
+            print "send : ", response, string
             sock.send(string)
 
 sock.close()

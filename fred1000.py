@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-# Evaluate chance of winning at each betting round.
-# 
-# For 50-60%, prefer check to raise
-# For 40-50% and past flop, don't fold
+# Evaluate chance of winning at each betting round. Raise when possible
 
 import socket
 import random
@@ -130,7 +127,7 @@ while 1:
 
             percent = main.estimate([ai2num(c) for c in ourCards],
                                     [ai2num(c) for c in holeCards],
-                                    100)
+                                    1000)
 
             #print "EQUITY: ", percent
 
@@ -141,7 +138,7 @@ while 1:
             elif raises >= 4 and roundNumber > 1:
                 response = 'c'
 
-            if percent < 0.5 and not (len(bets[-1]) > 0 and bets[-1][-1] == 'c'):
+            if percent < 0.5:
                 if len(bets[-1]) == 0 or (len(bets[-1]) == 1 and bets[-1][0] == 'c'):
                     response = 'c'
                 else:

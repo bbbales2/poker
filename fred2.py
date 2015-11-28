@@ -114,22 +114,7 @@ while 1:
         #print "play", play
 
         if play and not finished:
-            ranks = '23456789TJQKA'
-            suits = 'shdc'
-
-            deck = set()
-            for r in ranks:
-                for s in suits:
-                    deck.add(r + s)
-
-            for card in ourCards + holeCards:
-                deck.remove(card)
-
-            #print ourCards
-            #print holeCards
-
             percent = main.estimate([ai2num(c) for c in ourCards],
-                                    [ai2num(c) for c in deck],
                                     [ai2num(c) for c in holeCards],
                                     100)
 
@@ -147,7 +132,8 @@ while 1:
 
             if ((percent < 0.5 and roundNumber <= 2) or
                 (percent < 0.4 and roundNumber > 2)):
-                if len(bets[-1]) == 0 or bets[-1][0] == 'c':
+#                if len(bets[-1]) == 0 or bets[-1][0] == 'c':
+                if len(bets[-1]) == 0 or (len(bets[-1]) == 1 and bets[-1][0] == 'c'):
                     response = 'c'
                 else:
                     response = 'f'

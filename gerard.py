@@ -96,7 +96,6 @@ while 1:
                 deck.remove(card)
 
             percent = main.estimate([ai2num(c) for c in ourCards],
-                                    [ai2num(c) for c in deck],
                                     [], 100)
 
             print "Percent to win = ", percent

@@ -126,7 +126,6 @@ while 1:
             #print holeCards
 
             percent = main.estimate([ai2num(c) for c in ourCards],
-                                    [ai2num(c) for c in deck],
                                     [ai2num(c) for c in holeCards],
                                     100)
 
@@ -140,7 +139,7 @@ while 1:
                 response = 'c'
 
             if percent < 0.5:
-                if len(bets[-1]) == 0 or bets[-1][0] == 'c':
+                if len(bets[-1]) == 0 or (len(bets[-1]) == 1 and bets[-1][0] == 'c'):
                     response = 'c'
                 else:
                     response = 'f'
