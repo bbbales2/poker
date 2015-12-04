@@ -32,7 +32,7 @@ players = ['joao5', 'clifford2', 'clifford', 'gerard', 'fred', 'fred1000', 'fred
 
 output = []
 
-for p1, p2 in itertools.combinations_with_replacement(players, 2):#[('joao5', 'fred')]:#
+for p1, p2 in [('joao5', 'fred2')]:#itertools.combinations_with_replacement(players, 2):#
     match = "{0}vs{1}".format(p1, p2)
 
     money = []
@@ -51,19 +51,19 @@ for p1, p2 in itertools.combinations_with_replacement(players, 2):#[('joao5', 'f
 
     money2 = numpy.cumsum(money)
 
-    #print match, money[-1] / (10000 * 20.0)
-    #plt.plot(numpy.zeros(len(money2)), 'r', linewidth = 6)
-    #plt.plot(range(1, len(money2) + 1), money2 / 20, 'b', linewidth = 6)
-    #plt.title("{0} vs {1}".format(p1.capitalize(), p2.capitalize()), fontsize = 44)
-    #plt.tick_params(axis='both', which='major', labelsize=20)
-    #plt.tick_params(axis='both', which='minor', labelsize=20)
-    #plt.yticks(rotation = 45)
+    print match, money[-1] / (10000 * 20.0)
+    plt.plot(numpy.zeros(len(money2)), 'r', linewidth = 6)
+    plt.plot(range(1, len(money2) + 1), money2 / 20, 'b', linewidth = 6)
+    plt.title("{0} vs {1}".format(p1.capitalize(), p2.capitalize()), fontsize = 44)
+    plt.tick_params(axis='both', which='major', labelsize=20)
+    plt.tick_params(axis='both', which='minor', labelsize=20)
+    plt.yticks(rotation = 45)
     #plt.ylim((-1000, 4000))
-    #fig = matplotlib.pyplot.gcf()
-    #fig.set_size_inches(14.5, 10.5)
-    #plt.xlabel('Hand #', fontsize = 36)
-    #plt.ylabel('{0}\'s money (big blinds)'.format(p1.capitalize()), fontsize = 36)
-    #plt.show()
+    fig = matplotlib.pyplot.gcf()
+    fig.set_size_inches(14.5, 10.5)
+    plt.xlabel('Hand #', fontsize = 36)
+    plt.ylabel('{0}\'s money (big blinds)'.format(p1.capitalize()), fontsize = 36)
+    plt.show()
 
     mean = numpy.mean(money)
 
